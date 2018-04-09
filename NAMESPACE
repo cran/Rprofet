@@ -1,2 +1,3 @@
 exportPattern("^[[:alpha:]]+")
-importFrom("stats", "aggregate", "as.formula", "glm")
+importFrom("stats", "aggregate", "as.formula", "glm", "cutree", "hclust", "dist")
+import(binr, ClustOfVar, ggplot2, gridExtra, plyr, sqldf,stringr)

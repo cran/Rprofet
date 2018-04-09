@@ -4,8 +4,7 @@
 \alias{WOE_customFactor}
 \title{Custom Binning Factor Variables}
 \usage{
-WOE_customFactor(dataset, var, target, new_levels, new_labels,
-  color = "#0066CC")
+WOE_customFactor(dataset, var, target, new_levels, color = "#0066CC")
 }
 \arguments{
 \item{dataset}{Dataframe containing the target variable and desired factor variables to be binned.}
@@ -17,9 +16,6 @@ WOE_customFactor(dataset, var, target, new_levels, new_labels,
 \item{new_levels}{A vector the same length as the number of levels
 for the categorical variable containing the new factor levels.
 Must be specified.}
-
-\item{new_labels}{A vector the same length as the number of new factor
-levels assigned containing the labels for the new factor levels. If specified, renames \code{new_levels}.}
 
 \item{color}{A hexadecimal value representing a specific color.}
 }
@@ -40,11 +36,10 @@ custom1 <- WOE_customFactor(mydata, var="student", target="default",
                  new_levels=c("Student : No","Student : Yes"))
 levels(custom1)
 ## --------------------------
-mydata$balance_cat <- cut(mydata$balance, breaks = c(0,800,1600,2400),
-                      labels = c("1", "2", "3"))
+mydata$balance_cat <- cut(mydata$balance, breaks = c(-1,400,800,1200,1600,2000,2400,2800),
+                      labels = c("Very-Low","Low","Med-Low","Med","Med-High","High","Very-High"))
 custom2 <- WOE_customFactor(mydata, var="balance_cat", target="default",
-                   new_levels=c(1,2,3),
-                   new_labels=c("bal : low","bal : medium","bal : high" ))
+                   new_levels=c(1,1,2,2,2,3,3))
 levels(custom2)
 
 }

@@ -27,7 +27,7 @@ mydata <- ISLR::Default
 mydata$ID = seq(1:nrow(mydata)) ## make the ID variable
 mydata$default<-ifelse(mydata$default=="Yes",1,0) ## Creating numeric binary target variable
 
-binned <- BinFun3(mydata, id= "ID", target= "default", num.bins = 5) ## Binning variables
+binned <- BinProfet(mydata, id= "ID", target= "default", num.bins = 5) ## Binning variables
 
 WOEplotter(binned, target= "default", var= "income_Bins")
 

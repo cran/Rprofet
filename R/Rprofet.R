@@ -28,27 +28,20 @@
 #' @examples mydata$default <- ifelse(mydata$default=="Yes", 1, 0) ## target coded with 1, 0
 #'
 #' @examples ## bin balance and income
-#' @examples binned1 <- BinFun3(mydata, id="ID", target="default",
+#' @examples binned1 <- BinProfet(mydata, id="ID", target="default",
 #' @examples                   varcol = c("balance",  "income"), num.bins = 5)
 #' @examples head(binned1)
-#' @examples lapply(binned1[,c(3,4)], summary)
 #'
 #' @examples ## bin categorical variable-------------------
-#' @examples binned2 <- BinFun3(mydata, id="ID", target="default",
+#' @examples binned2 <- BinProfet(mydata, id="ID", target="default",
 #' @examples                    varcol = "student", num.bins = 5)
 #' @examples head(binned2)
 #' @examples summary(binned2$student_Bins) ## num.bins overriden
 #'
-#' @examples ## special.values------------------
-#' @examples
-#' @examples binned3 <- BinFun3(mydata, id="ID", target = "default", num.bins = 5,
-#' @examples                    varcol = "balance", special.values = 0)
-#' @examples summary(binned3$balance_Bins)
-#'
 #' @return  A dataframe containing the ID, target, and binned variable(s) with corresponding binned vlues.
 #'
 #' @export
-BinFun3<-function(dat,id,target,varcol,minimum.cat = 4,num.bins = 10,min.pts.bin = 25,bracket = "left",special.values = NULL){
+BinProfet<-function(dat,id,target,varcol,minimum.cat = 4,num.bins = 10,min.pts.bin = 25,bracket = "left",special.values = NULL){
 
   ## Obtaining the input column names or column numbers depending which input
   if(is.character(target) == TRUE){ target <- match(target,colnames(dat)) }
@@ -234,6 +227,27 @@ BinFun3<-function(dat,id,target,varcol,minimum.cat = 4,num.bins = 10,min.pts.bin
   Merged2=Merged2[,c(1,2,seq(4,ncol(Merged2), by = 2))]
 
 
+  ##Functions to help reorder the factor levels increasing numeric values
+  findLo = function(vec){
+    if(sapply(strsplit(vec, ","), length)==1){
+      return(NA)
+    }
+    tmp = strsplit(vec, ",")
+    lo = as.numeric(tmp[[1]][1])
+    return(lo)
+  }
+
+  reorder_levels = function(vars){
+    x = gsub("\\[|\\]|\\(|\\)", "", levels(vars))
+    vec = sapply(x, findLo)
+    NewBins = factor(vars,levels(vars)[order(vec)])
+    return(NewBins)
+  }
+
+  ##Reording factor levels based on increasing numeric value
+  Merged2[,3:ncol(Merged2)] =  as.data.frame(lapply(Merged2[,3:ncol(Merged2)],reorder_levels))
+
+
   return(Merged2)
 }
 
@@ -256,9 +270,9 @@ BinFun3<-function(dat,id,target,varcol,minimum.cat = 4,num.bins = 10,min.pts.bin
 #' @examples mydata$ID = seq(1:nrow(mydata)) ## make the ID variable
 #' @examples mydata$default<-ifelse(mydata$default=="Yes",1,0) ## Creating numeric binary target variable
 #'
-#' @examples binned <- BinFun3(mydata, id= "ID", target= "default", num.bins = 5) ## Binning variables
+#' @examples binned <- BinProfet(mydata, id= "ID", target= "default", num.bins = 5) ## Binning variables
 #'
-#' @examples WOE_dat <- WOEFun3(binned, "ID","default", 3:5)
+#' @examples WOE_dat <- WOEProfet(binned, "ID","default", 3:5)
 #'
 #' @examples head(WOE_dat$BinWOE)
 #' @examples head(WOE_dat$WOE)
@@ -274,7 +288,7 @@ BinFun3<-function(dat,id,target,varcol,minimum.cat = 4,num.bins = 10,min.pts.bin
 #'
 #'
 #' @export
-WOEFun3 <- function(dat,id,target,varcol){
+WOEProfet <- function(dat,id,target,varcol){
 
   ## Ifelse statement to identify if the target input is the column number or column name
   ##    If it is the column name, store the name and convert target input to column number
@@ -419,13 +433,14 @@ WOEFun3 <- function(dat,id,target,varcol){
 #'
 #' Function that fits a logistic regression models and scores points for each bin and calculates observations' total score.
 #'
-#' @param dat Dataframe containing the WOE binned variables.
+#' @param object A WOEProfet object containing dataframes with binned and WOE values.
 #' @param target A binary target variable.
 #' @param id ID variable.
-#' @param varcol Vector of variables to be used in the logistic regression model.
+#' @param varcol Vector of WOE variables to be used in the logistic regression model.
 #' @param PDO Points to Double Odds.
 #' @param BaseOdds Base Odds.
 #' @param BasePts Base Points.
+#' @param reverse Logical. If true, higher points corresponds to a lower probability of being target.
 #'
 #'
 #' @examples mydata <- ISLR::Default
@@ -433,43 +448,52 @@ WOEFun3 <- function(dat,id,target,varcol){
 #' @examples mydata$ID = seq(1:nrow(mydata)) ## make the ID variable
 #' @examples mydata$default<-ifelse(mydata$default=="Yes",1,0) ## Creating numeric binary target variable
 #'
-#' @examples binned <- BinFun3(mydata, id= "ID", target= "default", num.bins = 5) ## Binning variables
+#' @examples binned <- BinProfet(mydata, id= "ID", target= "default", num.bins = 5) ## Binning variables
 #'
-#' @examples WOE_dat <- WOEFun3(binned, "ID","default", 3:5) ## WOE transformation of bins
+#' @examples WOE_dat <- WOEProfet(binned, "ID","default", 3:5) ## WOE transformation of bins
 #'
-#' @examples Score_dat <- ScorecardFUN(WOE_dat$WOE, target="default",
-#'                                     id= "ID", PDO = 50, BaseOdds = 10, BasePts = 1000)
+#' @examples Score_dat <- ScorecardProfet(WOE_dat, target="default",
+#' @examples                              id= "ID", PDO = 50, BaseOdds = 10, BasePts = 1000, reverse = TRUE)
 #'
 #' @examples Score_dat$GLMSummary
-#' @examples head(Score_dat$Scorecard) ## More points means more likely to default
+#' @examples head(Score_dat$Scorecard) ## Less points means more likely to default
 #'
 #'
 #' @return A list with the following components.
-#' \item{Scorecard}{Dataframe with the points assigned to each attribute and the total score for each observation.}
+#' \item{Scorecard}{The actual scorecard model. Table with the attribute bins and their corresponding WOE values and the points assigned to each bin.}
+#' \item{Results}{Dataframe with the bin, WOE value, and points assigned to each attribute and the total score for each observation.}
 #' \item{GLMSummary}{The summary of the logistic regression model fitted to build the scorecard.}
 #'
 #' @export
-ScorecardFUN <- function(dat, target, id, varcol, PDO = 100, BaseOdds = 10, BasePts = 1000){
+ScorecardProfet <- function(object, target, id, varcol, PDO = 100, BaseOdds = 10, BasePts = 1000, reverse = FALSE ){
+
+
+  data = object[[2]]
 
   ## Ifelse statement to identify if the target input is column names
   ##    If it is obtain the column numbers
   if(is.character(target) == TRUE){
-    tar_num <- match(target,colnames(dat))
+    tar_num <- match(target,colnames(data))
   }
   ##    Else store the target columns and convert target to column names
   else if(is.numeric(target) == TRUE){
     tar_num <- target
-    target <- colnames(dat)[target]
+    target <- colnames(data)[target]
   }
 
   ## If ID input is column names, convert it to column numbers
-  if(is.character(id) == TRUE){ id <- match(id, colnames(dat))}
+  if(is.character(id) == TRUE){ id <- match(id, colnames(data))}
 
   ## If varcol input is missing, Use all columns except target and ID columns
-  if(missing(varcol)){ varcol <- colnames(dat)[c(-id,-tar_num)] }
+  if(missing(varcol)){ varcol <- colnames(data)[c(-id,-tar_num)] }
 
   ## If varcol is column numbers, convert to column names
-  if(is.numeric(varcol) == TRUE){ varcol <- colnames(dat)[varcol] }
+  if(is.numeric(varcol) == TRUE){ varcol <- colnames(data)[varcol] }
+
+  if(reverse == TRUE){
+    data[,varcol] = -data[,varcol]
+  }
+
 
   ## Calculating the factor and offset based on user inputs
   factor = PDO/log(2)
@@ -479,7 +503,7 @@ ScorecardFUN <- function(dat, target, id, varcol, PDO = 100, BaseOdds = 10, Base
   form = as.formula(paste(target, paste(varcol, collapse=" + "), sep=" ~ "))
 
   ## Fitting a logistic regression model
-  logmod <- glm(form,data=dat,family = "binomial")
+  logmod <- glm(form,data=data,family = "binomial")
 
   ## Storing the logistic regression model summary
   logmod.summary = summary(logmod)
@@ -492,23 +516,58 @@ ScorecardFUN <- function(dat, target, id, varcol, PDO = 100, BaseOdds = 10, Base
   a=modelcoef[1]
   n=length(modelcoef)-1
 
-  ## Creating an empty data frame to store scores
-  tmp <- data.frame(rep(NA,nrow(dat)))
+  datBinWOE = object[[1]]
 
-  ## Loop that calculates score for each bin and assigns it to each observation
-  for(i in 1:n){
-    tmp[,i] = round((dat[,varcol[i]]*modelcoef[which(modelterms==varcol[i])]+a/n)*factor+offset/n,0)
-    colnames(tmp)[i] = paste(varcol[i], "Points", sep = "_")
+  calc_points <- function(datBinWOE, varcol, modelcoef, modelterms, a, n, factor, offset){
+    pat = gsub("_WOE", "",varcol[1])
+
+    score_bins = data.frame(datBinWOE[,colnames(datBinWOE)[which(stringr::str_detect(colnames(datBinWOE), pat))]])
+    score_bins$score = round((datBinWOE[,varcol]*modelcoef[which(modelterms==varcol)]+a/n)*factor+offset/n,0)
+    colnames(score_bins)[3] = paste(varcol, "Points", sep = "_")
+
+    return(score_bins)
   }
 
-  ## Summing up to find the total Score
-  tmp$Score = rowSums(tmp,na.rm = TRUE)
 
-  ## Attaching id and target columns
-  tmp2 <- data.frame(dat[,c(id,tar_num)],tmp)
+  card_wrapper <- function(varcol){
+    calc_points(datBinWOE,
+                varcol,
+                modelcoef,
+                modelterms,
+                a,
+                n,
+                factor,
+                offset)
+  }
+
+
+  z = lapply(varcol, card_wrapper)
+
+
+  tmp = data.frame(ID = datBinWOE[,"ID"], default = datBinWOE[,"default"], as.data.frame(z))
+
+  tmp$Score = rowSums(tmp[,seq(5,ncol(tmp), by = 3)], na.rm = TRUE)
+
+
+
+  scard <- function(varcol){
+    attribute = gsub("_Bins_WOE","",varcol)
+
+    sql_state = paste("Select '",attribute,"' as Attribute,", paste(attribute,"Bins",sep = "_"), "as Bins,", paste(attribute,"Bins_WOE",sep = "_"),"as WOE,",
+                      paste(attribute,"Bins_WOE_Points",sep = "_"), "as Points from", deparse(substitute(tmp)), "group by", paste(attribute,"Bins",sep = "_"))
+
+    return(sqldf::sqldf(sql_state))
+
+  }
+
+
+  chk = lapply(varcol, scard)
+
+  chk2 = do.call("rbind",chk)
+
 
   ## generating a list to return mulitple items
-  tmp3 = list(Scorecard = tmp2, GLMSummary = logmod.summary)
+  tmp3 = list(Scorecard = chk2, Results = tmp, GLMSummary = logmod.summary)
 
   return(tmp3)
 
@@ -518,36 +577,113 @@ ScorecardFUN <- function(dat, target, id, varcol, PDO = 100, BaseOdds = 10, Base
 
 #' Variable Clustering
 #'
-#' @description Function that clusters numeric variables as a form of variable selection.
+#' @description Function that implements hierarchical clustering on the variables to be used as a form of variable selection.
 #'
-#' @param dat Dataframe containing the WOE binned variables. See 'Details'.
+#' @param object A WOEProfet object containing dataframes with binned and WOE values.
 #' @param id ID variable.
 #' @param target A binary target variable.
 #' @param num_clusts Number of desired clusters.
-#' @details All the variables that are to be clustered must be numeric or integer type.
+#' @param method Clustering method to be used. This should be one of "ward.D", "ward.D2", "single", "average", "mcquitty", "median",or "centroid".
 #'
 #' @return A dataframe with the name of all the variables to be clustered,
 #' the corresponding cluster and the information value for each variable.
 #'
-#'
 #' @examples mydata <- ISLR::Default
-#' @examples mydata$ID <- seq(1:nrow(mydata)) ## make an ID variable
-#' @examples mydata$default <- ifelse(mydata$default=="Yes", 1, 0) ## target coded with 1, 0
+#' @examples mydata$ID = seq(1:nrow(mydata)) ## make the ID variable
+#' @examples mydata$default<-ifelse(mydata$default=="Yes",1,0) ## Creating numeric binary target variable
+#'
 #' @examples ## create two new variables from bivariate normal
 #' @examples sigma <- matrix(c(45000,-3000,-3000, 55000), nrow = 2)
 #' @examples set.seed(10)
 #' @examples newvars <- MASS::mvrnorm(nrow(mydata),
-#' @examples                      mu=c(1000,200), Sigma=sigma)
+#' @examples                          mu=c(1000,200), Sigma=sigma)
+#'
 #' @examples mydata$newvar1 <- newvars[,1]
 #' @examples mydata$newvar2 <- newvars[,2]
-#' @examples
-#' @examples ## Cluster numeric variables by WOEClust
-#' @examples clusters <- WOEClust(dat=mydata, id="ID", target="default", num_clusts=2)
+#'
+#' @examples binned <- BinProfet(mydata, id= "ID", target= "default", num.bins = 5) ## Binning variables
+#'
+#' @examples WOE_dat <- WOEProfet(binned, "ID","default")
+#'
+#' @examples ## Cluster variables by WOEClust_hclust
+#' @examples clusters <- WOEClust_hclust(WOE_dat, id="ID", target="default", num_clusts=3)
 #' @examples clusters
 #'
+#' @export
+WOEClust_hclust<-function(object,id,target,num_clusts,method='ward.D'){
+
+  dat = object[[2]]
+
+  ## Adjusting ID, target inputs to be column numbers
+  if(is.character(id) == TRUE){id = match(id,colnames(dat))}
+  if(is.character(target) == TRUE){target = match(target,colnames(dat))}
+
+  woe_trans = t(dat[,-c(id,target)])
+  dist.probes = dist(woe_trans)
+
+  probes.complete=hclust(dist.probes, method = method)
+
+  groups = cutree(probes.complete, k=num_clusts)
+
+  Memberships<-data.frame(groups)
+  Memberships<-cbind(rownames(Memberships),Memberships)
+  rownames(Memberships) <- NULL
+  names(Memberships)<-c("Variable","Group")
+  Memberships$Variable = as.character(Memberships$Variable)
+
+  infoVal = object[[3]]
+
+  Memberships$IV = round(infoVal[,2],4)
+
+  Memberships = Memberships[order(Memberships$Group,-Memberships$IV),]
+
+  Memberships$Variable = as.character(Memberships$Variable)
+
+
+  return(Memberships)
+}
+
+
+
+#' Kmeans Variable Clustering
+#'
+#' @description Function that implements kmeans variable clusteting to be used as a form of variable selection.
+#'
+#' @param object A WOEProfet object containing dataframes with binned and WOE values.
+#' @param id ID variable.
+#' @param target A binary target variable.
+#' @param num_clusts Number of desired clusters.
+#'
+#' @return A dataframe with the name of all the variables to be clustered,
+#' the corresponding cluster and the information value for each variable.
+#'
+#' @examples mydata <- ISLR::Default
+#' @examples mydata$ID = seq(1:nrow(mydata)) ## make the ID variable
+#' @examples mydata$default<-ifelse(mydata$default=="Yes",1,0) ## Creating numeric binary target variable
+#'
+#' @examples ## create two new variables from bivariate normal
+#' @examples sigma <- matrix(c(45000,-3000,-3000, 55000), nrow = 2)
+#' @examples set.seed(10)
+#' @examples newvars <- MASS::mvrnorm(nrow(mydata),
+#' @examples                          mu=c(1000,200), Sigma=sigma)
+#'
+#' @examples mydata$newvar1 <- newvars[,1]
+#' @examples mydata$newvar2 <- newvars[,2]
+#'
+#' @examples binned <- BinProfet(mydata, id= "ID", target= "default", num.bins = 5) ## Binning variables
+#'
+#' @examples WOE_dat <- WOEProfet(binned, "ID","default")
+#'
+#' @examples ## Cluster variables by WOEClust_kmeans
+#' @examples clusters <- WOEClust_kmeans(WOE_dat, id="ID", target="default", num_clusts=3)
+#' @examples clusters
 #'
 #' @export
-WOEClust<-function(dat,id,target,num_clusts){
+#'
+#' @export
+WOEClust_kmeans<-function(object,id,target,num_clusts){
+
+  dat = object[[2]]
 
   ## Adjusting ID, target inputs to be column numbers
   if(is.character(id) == TRUE){id = match(id,colnames(dat))}
@@ -624,7 +760,7 @@ WOEClust<-function(dat,id,target,num_clusts){
 #' @examples mydata$ID = seq(1:nrow(mydata)) ## make the ID variable
 #' @examples mydata$default<-ifelse(mydata$default=="Yes",1,0) ## Creating numeric binary target variable
 #'
-#' @examples binned <- BinFun3(mydata, id= "ID", target= "default", num.bins = 5) ## Binning variables
+#' @examples binned <- BinProfet(mydata, id= "ID", target= "default", num.bins = 5) ## Binning variables
 #'
 #' @examples WOEplotter(binned, target= "default", var= "income_Bins")
 #'
@@ -632,7 +768,7 @@ WOEClust<-function(dat,id,target,num_clusts){
 #' @examples WOEplotter(binned, target= "default", var= "income_Bins", color = "#33FF33")
 #'
 #' @export
-WOEplotter<-function(dataset,target,var, color = "#0066CC"){
+WOEplotter <- function(dataset,target,var, color = "#0066CC"){
 
   ## Converting var and target inputs to the column names
   if(is.character(var) == FALSE){var = colnames(dataset)[var]}
@@ -726,7 +862,7 @@ WOEplotter<-function(dataset,target,var, color = "#0066CC"){
 #'
 #' @export
 
-WOE_custom = function(dataset, var, target, breaks, right_bracket = F, color = "#0066CC"){
+WOE_custom <- function(dataset, var, target, breaks, right_bracket = F, color = "#0066CC"){
 
   ## Obtaining var input column names
   if(is.numeric(var) == TRUE){var = colnames(dataset)[var]}
@@ -814,8 +950,6 @@ WOE_custom = function(dataset, var, target, breaks, right_bracket = F, color = "
 #' @param new_levels A vector the same length as the number of levels
 #' for the categorical variable containing the new factor levels.
 #' Must be specified.
-#' @param new_labels A vector the same length as the number of new factor
-#' levels assigned containing the labels for the new factor levels. If specified, renames \code{new_levels}.
 #' @param color A hexadecimal value representing a specific color.
 #'
 #' @return A vector containing the newly binned values.
@@ -831,21 +965,18 @@ WOE_custom = function(dataset, var, target, breaks, right_bracket = F, color = "
 #' @examples                  new_levels=c("Student : No","Student : Yes"))
 #' @examples levels(custom1)
 #' @examples ## --------------------------
-#' @examples mydata$balance_cat <- cut(mydata$balance, breaks = c(0,800,1600,2400),
-#' @examples                       labels = c("1", "2", "3"))
+#' @examples mydata$balance_cat <- cut(mydata$balance, breaks = c(-1,400,800,1200,1600,2000,2400,2800),
+#' @examples                       labels = c("Very-Low","Low","Med-Low","Med","Med-High","High","Very-High"))
 #' @examples custom2 <- WOE_customFactor(mydata, var="balance_cat", target="default",
-#' @examples                    new_levels=c(1,2,3),
-#' @examples                    new_labels=c("bal : low","bal : medium","bal : high" ))
+#' @examples                    new_levels=c(1,1,2,2,2,3,3))
 #' @examples levels(custom2)
 #'
 #' @export
 
-WOE_customFactor = function(dataset, var, target, new_levels, new_labels, color = "#0066CC"){
+WOE_customFactor <- function(dataset, var, target, new_levels, color = "#0066CC"){
 
   ## Creating default values for function inputs
-  new_lab = T    # This is to be used as a flag for the new labels input
   if(is.numeric(var) == TRUE){var = colnames(dataset)[var]}
-  if(missing(new_labels)){new_lab = F}
   if(missing(color)){color = "#0066CC"}
   if(missing(target)){
     print("ERROR: Target variable input is missing.")
@@ -855,13 +986,25 @@ WOE_customFactor = function(dataset, var, target, new_levels, new_labels, color 
   ## Storing the old factor variables
   var_bins = dataset[,var]
 
-  ## Changing the previous levels to the levels specified by the user. New levels must be the same length as the old levels.
-  ##      Example:  old levels = c(A,B,C,D,E)    new levels = c(1,1,1,2,3)
-  levels(var_bins) = new_levels
+  old_levels = levels(var_bins)
 
-  ## If desired, can relabel the levels. Has to be same unique length as new levels
-  ##     Example:  new levels = c(1,2,3)   new labels = c("Lake", "River", "Ocean")
-  if(new_lab == T){ levels(var_bins) = new_labels }
+
+  fact = data.frame(A = as.character(old_levels), B = as.character(new_levels))
+
+
+  counter = unique(fact[,2])
+
+  lookup = NULL
+  for(i in counter){
+    tmp = subset(fact, fact$B == i)
+    lookup = rbind(lookup,c(i,paste(tmp$A, collapse = "/")))
+  }
+  lookup = data.frame(lookup)
+
+  new_levels = as.character(lookup[match(new_levels,lookup[,1]),2])
+
+
+  levels(var_bins) = new_levels
 
 
   var_name = paste(var,"_Bins", sep = "")
@@ -923,10 +1066,6 @@ WOE_customFactor = function(dataset, var, target, new_levels, new_labels, color 
   return(var_bins)
 
 }
-
-
-
-
 
 
 
