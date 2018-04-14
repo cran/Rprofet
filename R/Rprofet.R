@@ -544,17 +544,38 @@ ScorecardProfet <- function(object, target, id, varcol, PDO = 100, BaseOdds = 10
   z = lapply(varcol, card_wrapper)
 
 
-  tmp = data.frame(ID = datBinWOE[,"ID"], default = datBinWOE[,"default"], as.data.frame(z))
+  tmp = data.frame(ID = datBinWOE[,id], default = datBinWOE[,target], as.data.frame(z))
 
   tmp$Score = rowSums(tmp[,seq(5,ncol(tmp), by = 3)], na.rm = TRUE)
 
+
+
+  lvl_order <- function(varcol){
+    tmp_lvls = as.numeric(tmp[,gsub("_WOE","",varcol)])
+    return(tmp_lvls)
+  }
+
+
+  lvls = lapply(varcol, lvl_order)
+
+  lvls2 = as.data.frame(lvls)
+
+  name_lvls <- function(varcol){
+    cnames = paste(gsub("_WOE","",varcol), "Level", sep = "_")
+    return(cnames)
+  }
+
+  colnames(lvls2) = sapply(varcol,name_lvls)
+
+
+  tmp = data.frame(tmp, lvls2)
 
 
   scard <- function(varcol){
     attribute = gsub("_Bins_WOE","",varcol)
 
     sql_state = paste("Select '",attribute,"' as Attribute,", paste(attribute,"Bins",sep = "_"), "as Bins,", paste(attribute,"Bins_WOE",sep = "_"),"as WOE,",
-                      paste(attribute,"Bins_WOE_Points",sep = "_"), "as Points from", deparse(substitute(tmp)), "group by", paste(attribute,"Bins",sep = "_"))
+                      paste(attribute,"Bins_WOE_Points",sep = "_"), "as Points from", deparse(substitute(tmp)), "group by", paste(attribute,"Bins_Level",sep = "_"))
 
     return(sqldf::sqldf(sql_state))
 

@@ -1,7 +1,7 @@
 Package: Rprofet
 Type: Package
 Title: WOE Transformation and Scorecard Builder
-Version: 2.1.0
+Version: 2.2.0
 Authors@R: c(
     person("Thomas", "Brandenburger", email = "thomas.brandenburger@sdstate.edu", role = "cre"),
     person("Eric", "Stratman", email = "eric.stratman@sdstate.edu", role = "aut"),
@@ -16,10 +16,10 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2018-04-09 14:49:38 UTC; stratman252
+Packaged: 2018-04-13 19:42:58 UTC; stratman252
 Author: Thomas Brandenburger [cre],
   Eric Stratman [aut],
   Riaz Khan [aut],
   Allison Lempola [aut]
 Repository: CRAN
-Date/Publication: 2018-04-09 17:00:21 UTC
+Date/Publication: 2018-04-14 14:53:09 UTC
