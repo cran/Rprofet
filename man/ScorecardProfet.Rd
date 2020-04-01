@@ -4,8 +4,16 @@
 \alias{ScorecardProfet}
 \title{Scorecard Builder}
 \usage{
-ScorecardProfet(object, target, id, varcol, PDO = 100, BaseOdds = 10,
-  BasePts = 1000, reverse = FALSE)
+ScorecardProfet(
+  object,
+  target,
+  id,
+  varcol,
+  PDO = 100,
+  BaseOdds = 10,
+  BasePts = 1000,
+  reverse = FALSE
+)
 }
 \arguments{
 \item{object}{A WOEProfet object containing dataframes with binned and WOE values.}

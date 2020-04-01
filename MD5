@@ -1,11 +1,11 @@
-c8c9be2a5549be9bf1e861aa73e1e7c8 *DESCRIPTION
+2e0f0574acda09e08abd978f7f0af7a5 *DESCRIPTION
 923d3431b419d029defe59cc09fb9fb4 *NAMESPACE
-90fe8b01704009d2c8164fbe3af3ee87 *R/Rprofet.R
-64c3fe63573cbffd9f96dfa7c6e47aa3 *man/BinProfet.Rd
-5bdb1b79dbeae277908f1916858862d0 *man/ScorecardProfet.Rd
+e67e00804f45a2a5279e0ecd97ca1006 *R/Rprofet.R
+a1e7bd10b07728b9e5a4beb9c0b86dab *man/BinProfet.Rd
+b0159139323dada5aa57e903bc1a28b5 *man/ScorecardProfet.Rd
 f183e487fbf1ffb8e727525319fdeb59 *man/WOEClust_hclust.Rd
 7e079abdb51b91cf00df5058ba6d0b90 *man/WOEClust_kmeans.Rd
 ff985be9a276a36d14f89e32d04a06a0 *man/WOEProfet.Rd
-66aedf5d05f32192273f63197e4ba7de *man/WOE_custom.Rd
+8f866eb40259c4cf208cae2d35ad25f7 *man/WOE_custom.Rd
 ef5ebc3a043327069f112eb4e04fb588 *man/WOE_customFactor.Rd
 47e5f7f7bd912703f0d3a324de6bd4f0 *man/WOEplotter.Rd

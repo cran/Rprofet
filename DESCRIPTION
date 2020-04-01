@@ -1,7 +1,7 @@
 Package: Rprofet
 Type: Package
 Title: WOE Transformation and Scorecard Builder
-Version: 2.2.0
+Version: 2.2.1
 Authors@R: c(
     person("Thomas", "Brandenburger", email = "thomas.brandenburger@sdstate.edu", role = "cre"),
     person("Eric", "Stratman", email = "eric.stratman@sdstate.edu", role = "aut"),
@@ -14,12 +14,12 @@ Imports: binr, ClustOfVar, ggplot2, gridExtra, plyr, sqldf, stringr
 Suggests: ISLR, MASS
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 7.1.0
 NeedsCompilation: no
-Packaged: 2018-04-13 19:42:58 UTC; stratman252
+Packaged: 2020-04-01 02:49:51 UTC; stratman252
 Author: Thomas Brandenburger [cre],
   Eric Stratman [aut],
   Riaz Khan [aut],
   Allison Lempola [aut]
 Repository: CRAN
-Date/Publication: 2018-04-14 14:53:09 UTC
+Date/Publication: 2020-04-01 15:50:02 UTC

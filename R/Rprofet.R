@@ -200,7 +200,8 @@ BinProfet<-function(dat,id,target,varcol,minimum.cat = 4,num.bins = 10,min.pts.b
         final<-Norm
       }
     }
-    Bins<-data.frame(final)
+    Bins<-data.frame(final, stringsAsFactors = TRUE)
+    Bins[,3] <- as.factor(Bins[,3])
     colnames(Bins)[3] <- paste(colnames(Bins)[2],"Bins",sep="_")
     return(c(Bins))}
 
@@ -522,7 +523,7 @@ ScorecardProfet <- function(object, target, id, varcol, PDO = 100, BaseOdds = 10
     pat = gsub("_WOE", "",varcol[1])
 
     score_bins = data.frame(datBinWOE[,colnames(datBinWOE)[which(stringr::str_detect(colnames(datBinWOE), pat))]])
-    score_bins$score = round((datBinWOE[,varcol]*modelcoef[which(modelterms==varcol)]+a/n)*factor+offset/n,0)
+    score_bins$score = round(-(datBinWOE[,varcol]*modelcoef[which(modelterms==varcol)]+a/n)*factor+offset/n,0)
     colnames(score_bins)[3] = paste(varcol, "Points", sep = "_")
 
     return(score_bins)
@@ -545,6 +546,8 @@ ScorecardProfet <- function(object, target, id, varcol, PDO = 100, BaseOdds = 10
 
 
   tmp = data.frame(ID = datBinWOE[,id], default = datBinWOE[,target], as.data.frame(z))
+  colnames(tmp)[1:2] = colnames(datBinWOE)[1:2]
+
 
   tmp$Score = rowSums(tmp[,seq(5,ncol(tmp), by = 3)], na.rm = TRUE)
 
@@ -568,14 +571,14 @@ ScorecardProfet <- function(object, target, id, varcol, PDO = 100, BaseOdds = 10
   colnames(lvls2) = sapply(varcol,name_lvls)
 
 
-  tmp = data.frame(tmp, lvls2)
+  tmp2 = data.frame(tmp, lvls2)
 
 
   scard <- function(varcol){
     attribute = gsub("_Bins_WOE","",varcol)
 
     sql_state = paste("Select '",attribute,"' as Attribute,", paste(attribute,"Bins",sep = "_"), "as Bins,", paste(attribute,"Bins_WOE",sep = "_"),"as WOE,",
-                      paste(attribute,"Bins_WOE_Points",sep = "_"), "as Points from", deparse(substitute(tmp)), "group by", paste(attribute,"Bins_Level",sep = "_"))
+                      paste(attribute,"Bins_WOE_Points",sep = "_"), "as Points from", deparse(substitute(tmp2)), "group by", paste(attribute,"Bins_Level",sep = "_"))
 
     return(sqldf::sqldf(sql_state))
 

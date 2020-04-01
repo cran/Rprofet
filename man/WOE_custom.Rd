@@ -4,8 +4,7 @@
 \alias{WOE_custom}
 \title{Custom Binning Numeric Variables}
 \usage{
-WOE_custom(dataset, var, target, breaks, right_bracket = F,
-  color = "#0066CC")
+WOE_custom(dataset, var, target, breaks, right_bracket = F, color = "#0066CC")
 }
 \arguments{
 \item{dataset}{Dataframe containing the target variable and desired numeric variables to be binned.}

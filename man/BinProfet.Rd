@@ -4,8 +4,17 @@
 \alias{BinProfet}
 \title{Binning Variable(s)}
 \usage{
-BinProfet(dat, id, target, varcol, minimum.cat = 4, num.bins = 10,
-  min.pts.bin = 25, bracket = "left", special.values = NULL)
+BinProfet(
+  dat,
+  id,
+  target,
+  varcol,
+  minimum.cat = 4,
+  num.bins = 10,
+  min.pts.bin = 25,
+  bracket = "left",
+  special.values = NULL
+)
 }
 \arguments{
 \item{dat}{Dataframe of that contains ID, binary target and variables to be binned.}
