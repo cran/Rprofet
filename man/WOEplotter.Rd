@@ -4,10 +4,10 @@
 \alias{WOEplotter}
 \title{Visualizing WOE and Target Rates}
 \usage{
-WOEplotter(dataset, target, var, color = "#0066CC")
+WOEplotter(data, target, var, color = "#0066CC")
 }
 \arguments{
-\item{dataset}{Dataframe containing binned values and a binary target variable.}
+\item{data}{Dataframe containing binned values and a binary target variable.}
 
 \item{target}{A numeric binary target variable.}
 
@@ -16,22 +16,17 @@ WOEplotter(dataset, target, var, color = "#0066CC")
 \item{color}{A hexadecimal value representing a specific color.}
 }
 \description{
-Function generating three plots: WOE value for each bin, target rate for each bin, and the frequency for each bin
+Function generating three plots: WOE value for each bin, target rate for each bin, and the frequency for each bin.
 }
 \details{
 A list of the hexadecimal colors can be found at this link http://www.sthda.com/sthda/RDoc/images/hextable.gif
 }
 \examples{
 mydata <- ISLR::Default
-
 mydata$ID = seq(1:nrow(mydata)) ## make the ID variable
 mydata$default<-ifelse(mydata$default=="Yes",1,0) ## Creating numeric binary target variable
-
 binned <- BinProfet(mydata, id= "ID", target= "default", num.bins = 5) ## Binning variables
-
 WOEplotter(binned, target= "default", var= "income_Bins")
-
 ##--Changing Colors------------------------------
 WOEplotter(binned, target= "default", var= "income_Bins", color = "#33FF33")
-
 }

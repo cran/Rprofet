@@ -4,10 +4,10 @@
 \alias{WOEProfet}
 \title{WOE Transformation}
 \usage{
-WOEProfet(dat, id, target, varcol)
+WOEProfet(data, id, target, varcol)
 }
 \arguments{
-\item{dat}{Dataframe of binned variables.}
+\item{data}{Dataframe of binned variables.}
 
 \item{id}{ID variable.}
 
@@ -17,7 +17,7 @@ WOEProfet(dat, id, target, varcol)
 }
 \value{
 A list with the following components.
-\item{BinWOE}{Dataframe with the binned variables and their WOE values.}
+\item{Bin}{Dataframe with the binned variables and their WOE values.}
 \item{WOE}{Dataframe with the WOE values.}
 \item{IV}{Each attribute and their associated information values.}
 \item{vars}{A list containing the different WOE values for each attribute.}
@@ -25,24 +25,14 @@ A list with the following components.
 \description{
 Function that calculates the WOE for each bin and the information value for each variable.
 }
-\details{
-The \code{id} and the \code{target} variables must be provided.
-The \code{target} variable must be a numeric binary variable.
-}
 \examples{
 mydata <- ISLR::Default
-
 mydata$ID = seq(1:nrow(mydata)) ## make the ID variable
 mydata$default<-ifelse(mydata$default=="Yes",1,0) ## Creating numeric binary target variable
-
 binned <- BinProfet(mydata, id= "ID", target= "default", num.bins = 5) ## Binning variables
-
-WOE_dat <- WOEProfet(binned, "ID","default", 3:5)
-
-head(WOE_dat$BinWOE)
+WOE_dat <- WOEProfet(binned, "ID", "default", 3:5)
+head(WOE_dat$Bin)
 head(WOE_dat$WOE)
 WOE_dat$IV
 head(WOE_dat$vars$income)
-
-
 }

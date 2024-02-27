@@ -6,9 +6,9 @@
 \usage{
 ScorecardProfet(
   object,
-  target,
   id,
-  varcol,
+  target,
+  GLModel,
   PDO = 100,
   BaseOdds = 10,
   BasePts = 1000,
@@ -16,13 +16,13 @@ ScorecardProfet(
 )
 }
 \arguments{
-\item{object}{A WOEProfet object containing dataframes with binned and WOE values.}
-
-\item{target}{A binary target variable.}
+\item{object}{A WOEProfet object or a Var_select object that containing dataframes with binned and WOE values.}
 
 \item{id}{ID variable.}
 
-\item{varcol}{Vector of WOE variables to be used in the logistic regression model.}
+\item{target}{A binary target variable.}
+
+\item{GLModel}{A generalized linear model, glm object.}
 
 \item{PDO}{Points to Double Odds.}
 
@@ -30,20 +30,16 @@ ScorecardProfet(
 
 \item{BasePts}{Base Points.}
 
-\item{reverse}{Logical. If true, higher points corresponds to a lower probability of being target.}
+\item{reverse}{Logical. If FALSE, higher points corresponds to a lower probability of being target.}
 }
 \value{
-A list with the following components.
-\item{Scorecard}{The actual scorecard model. Table with the attribute bins and their corresponding WOE values and the points assigned to each bin.}
-\item{Results}{Dataframe with the bin, WOE value, and points assigned to each attribute and the total score for each observation.}
-\item{GLMSummary}{The summary of the logistic regression model fitted to build the scorecard.}
+A scorecard dataframe.
 }
 \description{
 Function that fits a logistic regression models and scores points for each bin and calculates observations' total score.
 }
 \examples{
 mydata <- ISLR::Default
-
 mydata$ID = seq(1:nrow(mydata)) ## make the ID variable
 mydata$default<-ifelse(mydata$default=="Yes",1,0) ## Creating numeric binary target variable
 
@@ -51,11 +47,11 @@ binned <- BinProfet(mydata, id= "ID", target= "default", num.bins = 5) ## Binnin
 
 WOE_dat <- WOEProfet(binned, "ID","default", 3:5) ## WOE transformation of bins
 
-Score_dat <- ScorecardProfet(WOE_dat, target="default",
-                             id= "ID", PDO = 50, BaseOdds = 10, BasePts = 1000, reverse = TRUE)
+md <- glm(default ~ student_WOE+balance_WOE+income_WOE, data=WOE_dat$WOE, family="binomial")
+summary(md)
 
-Score_dat$GLMSummary
-head(Score_dat$Scorecard) ## Less points means more likely to default
+Score_dat <- ScorecardProfet(object=WOE_dat, id="ID", target="default", GLModel=md,
+                                 PDO = 50, BaseOdds = 10, BasePts = 1000, reverse = FALSE)
 
-
+Score_dat ## Less points means more likely to default
 }

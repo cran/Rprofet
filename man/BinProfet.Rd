@@ -2,73 +2,62 @@
 % Please edit documentation in R/Rprofet.R
 \name{BinProfet}
 \alias{BinProfet}
-\title{Binning Variable(s)}
+\title{Coarse Binning Variable(s)}
 \usage{
 BinProfet(
-  dat,
+  data,
   id,
   target,
   varcol,
-  minimum.cat = 4,
+  min.cat = 4,
   num.bins = 10,
   min.pts.bin = 25,
   bracket = "left",
-  special.values = NULL
+  special.values = NULL,
+  sort_id = FALSE
 )
 }
 \arguments{
-\item{dat}{Dataframe of that contains ID, binary target and variables to be binned.}
+\item{data}{Dataframe of that contains ID, binary target and variables to be binned.}
 
 \item{id}{ID variable. See 'Details'.}
 
-\item{target}{The binary taget/response variable for WOE. See 'Details'.}
+\item{target}{The binary target/response variable for WOE. See 'Details'.}
 
 \item{varcol}{Vector of variables to be binned.}
 
-\item{minimum.cat}{Minimum number of bins.}
+\item{min.cat}{Minimum number of bins.}
 
-\item{num.bins}{Target number of bins.
-Overridden by the number of levels if \code{varcol} is factor.}
+\item{num.bins}{Target number of bins. Overridden by the number of levels if varcol is factor.}
 
 \item{min.pts.bin}{Minimum number of observations in a bin.}
 
-\item{bracket}{Indicating if the intervals should be closed on the right or
-left. Options include \code{left} and \code{right}.}
+\item{bracket}{Indicating if the intervals should be closed on the right or left. Options include left and right.}
 
-\item{special.values}{A vector of values that should have their own bin.
-See 'Details'.}
+\item{special.values}{A vector of values that should have their own bin. See 'Details'.}
+
+\item{sort_id}{Logical. The default is FALSE which does not sort the data by ID column. If TRUE, then data is sorted increasingly by ID column.}
 }
 \value{
-A dataframe containing the ID, target, and binned variable(s) with corresponding binned vlues.
+A dataframe containing the ID, target, and binned variable(s) with corresponding binned values.
 }
 \description{
-Function that bins selected variable(s) and returns a dataframe with binned values.
-Uses greedy binning algorithm to perform coarse binning of selected variable(s).
-}
-\details{
-The \code{id} and the \code{target} variables must be provided.
-Works for numeric, factor and binary \code{target}. To build a scorecard,
-a binary \code{target} is required.
-
-Actual number of bins exceeds \code{num.bins} if
-\code{special.values} specified.
+Function that bins selected variable(s) and returns a dataframe with binned values. Uses greedy binning algorithm to perform coarse binning of selected variable(s).
 }
 \examples{
 mydata <- ISLR::Default
 head(mydata)
-
 mydata$ID <- seq(1:nrow(mydata)) ## make an ID variable
 mydata$default <- ifelse(mydata$default=="Yes", 1, 0) ## target coded with 1, 0
 
 ## bin balance and income
 binned1 <- BinProfet(mydata, id="ID", target="default",
-                  varcol = c("balance",  "income"), num.bins = 5)
+                        varcol = c("balance",  "income"), num.bins = 5)
 head(binned1)
 
 ## bin categorical variable-------------------
 binned2 <- BinProfet(mydata, id="ID", target="default",
-                   varcol = "student", num.bins = 5)
+                        varcol = "student", num.bins = 5)
 head(binned2)
 summary(binned2$student_Bins) ## num.bins overriden
-
 }
